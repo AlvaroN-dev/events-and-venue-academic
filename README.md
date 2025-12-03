@@ -547,4 +547,3 @@ Swagger validates data before sending and shows clear errors.
 - Unit and integration tests.
 - Security (Spring Security, JWT).
 - Additional validations (date range, positive price with BigDecimal)
-# events-and-venue-academic
