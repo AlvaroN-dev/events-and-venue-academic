@@ -10,7 +10,6 @@ import com.codeup.riwi.tiqueteracatalogo.infrastructure.repositories.EventoJpaRe
 import com.codeup.riwi.tiqueteracatalogo.infrastructure.repositories.VenueJpaRepository;
 import org.springframework.stereotype.Component;
 
-
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -22,7 +21,8 @@ import java.util.stream.Collectors;
  * This adapter handles the translation between domain models and JPA entities,
  * properly managing the bidirectional relationships with Venue and Categories.
  * 
- * Note: Transaction management is handled at the Use Case layer (application layer)
+ * Note: Transaction management is handled at the Use Case layer (application
+ * layer)
  * following hexagonal architecture principles. This adapter only handles
  * entity mapping and delegates persistence to JPA repository.
  */
@@ -32,8 +32,8 @@ public class EventoRepositoryAdapter implements EventoRepositoryPort {
     private final EventoJpaRepository jpaRepository;
     private final VenueJpaRepository venueJpaRepository;
 
-    public EventoRepositoryAdapter(EventoJpaRepository jpaRepository, 
-                                   VenueJpaRepository venueJpaRepository) {
+    public EventoRepositoryAdapter(EventoJpaRepository jpaRepository,
+            VenueJpaRepository venueJpaRepository) {
         this.jpaRepository = jpaRepository;
         this.venueJpaRepository = venueJpaRepository;
     }
@@ -106,10 +106,10 @@ public class EventoRepositoryAdapter implements EventoRepositoryPort {
         evento.setDescription(entity.getDescription());
         evento.setEventDate(entity.getEventDate());
         evento.setCategoria(entity.getCategoria());
-        
+
         // Get venueId from the ManyToOne relationship
         evento.setVenueId(entity.getVenueId());
-        
+
         evento.setCapacity(entity.getCapacity());
         evento.setPrice(entity.getPrice());
         evento.setCreatedAt(entity.getCreatedAt());
@@ -140,7 +140,7 @@ public class EventoRepositoryAdapter implements EventoRepositoryPort {
         entity.setDescription(evento.getDescription());
         entity.setEventDate(evento.getEventDate());
         entity.setCategoria(evento.getCategoria());
-        
+
         // Set the ManyToOne relationship with Venue
         if (evento.getVenueId() != null) {
             VenueJpaEntity venue = venueJpaRepository.findById(evento.getVenueId())
@@ -148,7 +148,7 @@ public class EventoRepositoryAdapter implements EventoRepositoryPort {
                             "Venue con ID " + evento.getVenueId() + " no encontrado"));
             entity.setVenue(venue);
         }
-        
+
         entity.setCapacity(evento.getCapacity());
         entity.setPrice(evento.getPrice());
         entity.setCreatedAt(evento.getCreatedAt());
@@ -169,8 +169,9 @@ public class EventoRepositoryAdapter implements EventoRepositoryPort {
      * Convert Category JPA entity to domain model
      */
     private Category categoryToDomain(CategoryJpaEntity entity) {
-        if (entity == null) return null;
-        
+        if (entity == null)
+            return null;
+
         Category category = new Category();
         category.setId(entity.getId());
         category.setName(entity.getName());
@@ -186,8 +187,9 @@ public class EventoRepositoryAdapter implements EventoRepositoryPort {
      * Convert Category domain model to JPA entity
      */
     private CategoryJpaEntity categoryToEntity(Category category) {
-        if (category == null) return null;
-        
+        if (category == null)
+            return null;
+
         CategoryJpaEntity entity = new CategoryJpaEntity();
         entity.setId(category.getId());
         entity.setName(category.getName());
