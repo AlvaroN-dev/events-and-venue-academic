@@ -3,6 +3,7 @@ package com.codeup.riwi.tiqueteracatalogo.application.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 
+
 @Schema(description = "Datos de entrada para crear o actualizar un venue")
 public class VenueRequest {
 

@@ -14,7 +14,7 @@ public class EventoRequest {
     private String name;
 
     @Size(max = 1000, message = "La descripción no puede exceder 1000 caracteres")
-    @Schema(description = "Descripción detallada del evento", example = "Gran concierto de rock con bandas internacionales", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(description = "Descripción detallada del evento", example = "Gran concierto de rock con bandas internacionales")
     private String description;
 
     @NotNull(message = "La fecha del evento es obligatoria")
