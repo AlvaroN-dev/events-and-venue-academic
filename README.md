@@ -1,309 +1,360 @@
-# TiqueteraCatalogo
+# TiqueteraCatalogo - Event Management System
 
+[![Java](https://img.shields.io/badge/Java-17-orange)](https://www.oracle.com/java/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.7-brightgreen)](https://spring.io/projects/spring-boot)
+[![Architecture](https://img.shields.io/badge/Architecture-Hexagonal-blue)](https://en.wikipedia.org/wiki/Hexagonal_architecture_(software))
+[![SOLID](https://img.shields.io/badge/Principles-SOLID-purple)](https://en.wikipedia.org/wiki/SOLID)
 
-A comprehensive RESTful API for managing events and venues, built with Spring Boot 3 and JPA persistence.
-
-## 📋 Table of Contents
-
-- [Overview](#overview)
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Getting Started](#getting-started)
-- [API Documentation](#api-documentation)
-- [Database](#database)
-- [Project Structure](#project-structure)
-- [API Endpoints](#api-endpoints)
-- [Validation](#validation)
-- [Error Handling](#error-handling)
-- [Examples](#examples)
+Event and venue management system implemented with **Hexagonal Architecture** and **SOLID principles**, using Spring Boot 3, JPA/Hibernate, and H2 Database.
 
 ---
 
-## 🎯 Overview
+## 📋 Table of Contents
 
-TiqueteraCatalogo is a Spring Boot application that provides a complete CRUD API for managing events and venues. It features JPA persistence with H2 database, comprehensive validation, pagination with dynamic filters, and global error handling.
+- [Features](#-features)
+- [Architecture](#-architecture)
+- [Technologies](#-technologies)
+- [Project Structure](#-project-structure)
+- [Installation and Execution](#-installation-and-execution)
+- [API Endpoints](#-api-endpoints)
+- [Swagger Documentation](#-swagger-documentation)
+- [Design Principles](#-design-principles)
+- [Usage Examples](#-usage-examples)
+
+---
 
 ## ✨ Features
 
-- ✅ **Full CRUD Operations** for Events and Venues
-- ✅ **JPA Persistence** with H2 database (file-based for data persistence)
-- ✅ **Comprehensive Validations** with Bean Validation (@Valid, @NotBlank, @Size, @Future, etc.)
-- ✅ **Pagination & Filtering** with Spring Data Pageable and JPA Specifications
-- ✅ **Global Error Handling** with @ControllerAdvice (400, 404, 409 errors)
-- ✅ **OpenAPI/Swagger Documentation** with detailed examples
-- ✅ **Entity Relationships** (ManyToOne between Event and Venue)
-- ✅ **Unique Constraints** (Event names must be unique)
-- ✅ **Audit Timestamps** (createdAt, updatedAt)
+- ✅ **Complete CRUD** for Events and Venues
+- ✅ **Hexagonal Architecture** (Ports & Adapters)
+- ✅ **SOLID principles** applied throughout the code
+- ✅ **H2 Database** in-memory
+- ✅ **Complete OpenAPI/Swagger documentation**
+- ✅ **Validations** with Bean Validation
+- ✅ **Centralized and secure error handling**
+- ✅ **DTOs** for request/response
+- ✅ **Mappers** for layer conversion
+- ✅ **Services** for use case orchestration
 
-## 🛠 Tech Stack
+---
 
-- **Java**: 17
-- **Spring Boot**: 3.5.7
-- **Spring Data JPA**: For database operations
-- **H2 Database**: File-based persistence
-- **Bean Validation**: For input validation
-- **Lombok**: To reduce boilerplate code
-- **Swagger/OpenAPI**: API documentation
-- **Maven**: Build tool
+## 🏗️ Architecture
 
-## 🚀 Getting Started
+This project implements **Hexagonal Architecture** (also known as Ports and Adapters), which separates business logic from implementation details.
 
-### Prerequisites
-
-- Java 17 or higher
-- Maven (included via wrapper)
-
-### Running the Application
-
-```powershell
-# Clone the repository
-cd c:\Users\anonimo\Videos\TiqueteraCatalogo
-
-# Compile
-./mvnw.cmd clean compile
-
-# Run
-./mvnw.cmd spring-boot:run
-```
-
-The application will start on `http://localhost:8080`
-
-### Access Points
-
-- **Application**: http://localhost:8080
-- **Swagger UI**: http://localhost:8080/swagger-ui.html
-- **H2 Console**: http://localhost:8080/h2-console
-  - JDBC URL: `jdbc:h2:file:./data/tiqueteradb`
-  - Username: `sa`
-  - Password: (empty)
-
-## 📚 API Documentation
-
-Interactive API documentation is available via Swagger UI at:
-```
-http://localhost:8080/swagger-ui.html
-```
-
-OpenAPI JSON specification:
-```
-http://localhost:8080/v3/api-docs
-```
-
-## 💾 Database
-
-### Configuration
-
-The application uses H2 database in file mode for persistence between restarts.
-
-**Configuration** (`application.properties`):
-```properties
-spring.datasource.url=jdbc:h2:file:./data/tiqueteradb
-spring.datasource.username=sa
-spring.datasource.password=
-spring.jpa.hibernate.ddl-auto=update
-```
-
-### Schema
-
-#### Venue Table
-| Column | Type | Constraints |
-|--------|------|-------------|
-| id | BIGINT | PRIMARY KEY, AUTO_INCREMENT |
-| name | VARCHAR(200) | NOT NULL |
-| address | VARCHAR(300) | NOT NULL |
-| city | VARCHAR(100) | NOT NULL |
-| country | VARCHAR(100) | NOT NULL |
-| capacity | INTEGER | NOT NULL |
-| created_at | TIMESTAMP | NOT NULL |
-| updated_at | TIMESTAMP | NOT NULL |
-
-#### Event Table
-| Column | Type | Constraints |
-|--------|------|-------------|
-| id | BIGINT | PRIMARY KEY, AUTO_INCREMENT |
-| name | VARCHAR(200) | NOT NULL, **UNIQUE** |
-| description | VARCHAR(1000) | |
-| event_date | TIMESTAMP | NOT NULL |
-| categoria | VARCHAR(100) | NOT NULL |
-| venue_id | BIGINT | NOT NULL, FK → venue(id) |
-| capacity | INTEGER | NOT NULL |
-| price | DOUBLE | NOT NULL |
-| created_at | TIMESTAMP | NOT NULL |
-| updated_at | TIMESTAMP | NOT NULL |
-
-## 📁 Project Structure
+### Main Layers
 
 ```
 src/main/java/com/codeup/riwi/tiqueteracatalogo/
-├── domain/
-│   ├── entity/              # JPA Entities
-│   │   ├── EventoEntity.java
-│   │   └── VenueEntity.java
-│   └── mapper/              # Entity-DTO Mappers
-│       ├── EventoMapper.java
-│       └── VenueMapper.java
-├── repository/              # JPA Repositories
-│   ├── EventoRepository.java
-│   ├── VenueRepository.java
-│   └── specification/       # JPA Specifications for dynamic filters
-│       └── EventoSpecification.java
-├── services/                # Business Logic
-│   ├── IEventoService.java
-│   ├── IVenueService.java
-│   └── impl/
-│       ├── EventoServiceImpl.java
-│       └── VenueServiceImpl.java
-├── web/
-│   ├── controller/          # REST Controllers
-│   │   ├── EventController.java
-│   │   └── VenueController.java
-│   ├── dto/                 # Data Transfer Objects
+│
+├── 📦 dominio/                    # DOMAIN LAYER
+│   ├── models/                    # Pure domain models (framework-free)
+│   │   ├── Evento.java
+│   │   └── Venue.java
+│   ├── ports/                     # Interfaces (contracts)
+│   │   ├── in/                    # Input ports (future)
+│   │   └── out/                   # Output ports
+│   │       ├── EventoRepositoryPort.java
+│   │       └── VenueRepositoryPort.java
+│   └── excepcion/                 # Domain exceptions
+│       └── RecursoNoEncontradoException.java
+│
+├── 📦 aplicacion/                 # APPLICATION LAYER
+│   ├── usecases/                  # Use cases (business logic)
+│   │   ├── evento/
+│   │   │   ├── CrearEventoUseCase.java
+│   │   │   ├── ObtenerEventoUseCase.java
+│   │   │   ├── ListarEventosUseCase.java
+│   │   │   ├── ActualizarEventoUseCase.java
+│   │   │   └── EliminarEventoUseCase.java
+│   │   └── venue/
+│   │       └── ... (same use cases)
+│   ├── services/                  # Services (orchestration)
+│   │   ├── EventoService.java
+│   │   └── VenueService.java
+│   ├── dto/                       # Data Transfer Objects
 │   │   ├── EventoRequest.java
 │   │   ├── EventoResponse.java
 │   │   ├── VenueRequest.java
 │   │   └── VenueResponse.java
-│   └── advice/              # Global Exception Handling
-│       ├── GlobalExceptionHandler.java
-│       ├── ErrorResponse.java
-│       └── ResourceNotFoundException.java
-└── config/                  # Configuration
-    └── OpenApiConfig.java
+│   └── mapper/                    # Mappers (DTO ↔ Domain)
+│       ├── EventoMapper.java
+│       └── VenueMapper.java
+│
+└── 📦 infraestructura/            # INFRASTRUCTURE LAYER
+    ├── controllers/               # REST controllers
+    │   ├── EventController.java
+    │   ├── VenueController.java
+    │   └── advice/                # Exception handlers
+    │       ├── GlobalExceptionHandler.java
+    │       └── ErrorResponse.java
+    ├── adapters/                  # Adapters (implement ports)
+    │   ├── EventoRepositoryAdapter.java
+    │   └── VenueRepositoryAdapter.java
+    ├── repositories/              # JPA repositories
+    │   ├── EventoJpaRepository.java
+    │   └── VenueJpaRepository.java
+    ├── entities/                  # JPA entities
+    │   ├── EventoJpaEntity.java
+    │   └── VenueJpaEntity.java
+    └── config/                    # Configuration
+        ├── OpenApiConfig.java
+        └── UseCaseConfiguration.java
 ```
 
-## 🔌 API Endpoints
+### Data Flow
 
-### Events
+```
+HTTP Request
+     ↓
+[Controller] ← Input Adapter
+     ↓
+[Use Case] ← Business Logic (uses Ports)
+     ↓
+[Repository Port] ← Interface (Output Port)
+     ↓
+[Repository Adapter] ← Port Implementation
+     ↓
+[JPA Repository] ← Persistence
+     ↓
+[H2 Database]
+```
+
+---
+
+## 🛠️ Technologies
+
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| Java | 17 | Programming language |
+| Spring Boot | 3.5.7 | Main framework |
+| Spring Data JPA | 3.5.7 | Data persistence |
+| H2 Database | 2.3.232 | In-memory database |
+| Hibernate | 6.6.33 | ORM |
+| Springdoc OpenAPI | 2.7.0 | Swagger documentation |
+| Lombok | 1.18.36 | Boilerplate reduction |
+| Bean Validation | 3.0 | Validations |
+| Maven | 3.9+ | Dependency management |
+
+---
+
+## 📁 Project Structure
+
+### Domain (Business Core)
+
+**Features:**
+- ✅ No framework dependencies
+- ✅ Pure models (POJOs)
+- ✅ Defines interfaces (ports)
+- ✅ Contains business exceptions
+
+**Example:**
+```java
+// Pure domain model
+public class Evento {
+    private Long id;
+    private String name;
+    private LocalDateTime eventDate;
+    // ... without JPA annotations
+}
+
+// Port (interface)
+public interface EventoRepositoryPort {
+    Evento save(Evento evento);
+    Optional<Evento> findById(Long id);
+    // ...
+}
+```
+
+### Application (Use Cases)
+
+**Features:**
+- ✅ Contains business logic
+- ✅ Depends only on ports (interfaces)
+- ✅ Framework-independent
+- ✅ Services orchestrate use cases
+
+**Example:**
+```java
+public class CrearEventoUseCase {
+    private final EventoRepositoryPort eventoRepository;
+    private final VenueRepositoryPort venueRepository;
+    
+    public Evento ejecutar(Evento evento) {
+        // Business validation
+        if (!venueRepository.existsById(evento.getVenueId())) {
+            throw new IllegalArgumentException("The venue does not exist");
+        }
+        return eventoRepository.save(evento);
+    }
+}
+```
+
+### Infrastructure (Implementation Details)
+
+**Features:**
+- ✅ Implements ports
+- ✅ Contains technical details (JPA, REST, etc.)
+- ✅ Interchangeable adapters
+- ✅ Controllers, Repositories, Entities
+
+**Example:**
+```java
+@Component
+public class EventoRepositoryAdapter implements EventoRepositoryPort {
+    private final EventoJpaRepository jpaRepository;
+    
+    @Override
+    public Evento save(Evento evento) {
+        EventoJpaEntity entity = toEntity(evento);
+        EventoJpaEntity saved = jpaRepository.save(entity);
+        return toDomain(saved);
+    }
+}
+```
+
+---
+
+## 🚀 Installation and Execution
+
+### Prerequisites
+
+- Java 17 or higher
+- Maven 3.9+ (included in the project as `mvnw`)
+
+### Steps
+
+1. **Clone the repository**
+```bash
+git clone https://github.com/your-user/TiqueteraCatalogo.git
+cd TiqueteraCatalogo
+```
+
+2. **Compile the project**
+```bash
+./mvnw clean compile
+```
+
+3. **Run the application**
+```bash
+./mvnw spring-boot:run
+```
+
+4. **Verify it's running**
+- Application: http://localhost:8080
+- Swagger UI: http://localhost:8080/swagger-ui.html
+- H2 Console: http://localhost:8080/h2-console
+
+---
+
+## 📡 API Endpoints
+
+### Events (`/api/events`)
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/events` | Get all events |
+| GET | `/api/events` | List all events |
 | GET | `/api/events/{id}` | Get event by ID |
-| GET | `/api/events/venue/{venueId}` | Get events by venue |
-| GET | `/api/events/paginated` | Get paginated events with filters |
+| GET | `/api/events/venue/{venueId}` | List events by venue |
 | POST | `/api/events` | Create new event |
 | PUT | `/api/events/{id}` | Update event |
 | DELETE | `/api/events/{id}` | Delete event |
 
-### Venues
+### Venues (`/api/venues`)
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/venues` | Get all venues |
+| GET | `/api/venues` | List all venues |
 | GET | `/api/venues/{id}` | Get venue by ID |
 | POST | `/api/venues` | Create new venue |
 | PUT | `/api/venues/{id}` | Update venue |
 | DELETE | `/api/venues/{id}` | Delete venue |
 
-### Pagination & Filters
+---
 
-**Endpoint**: `GET /api/events/paginated`
+## 📚 Swagger Documentation
 
-**Query Parameters**:
-| Parameter | Type | Required | Default | Description |
-|-----------|------|----------|---------|-------------|
-| ciudad | String | No | - | Filter by venue city |
-| categoria | String | No | - | Filter by event category |
-| fechaInicio | LocalDateTime | No | - | Filter events after this date |
-| page | int | No | 0 | Page number (0-indexed) |
-| size | int | No | 10 | Page size |
-| sort | String | No | eventDate | Sort field |
-| direction | String | No | desc | Sort direction (asc/desc) |
+Access interactive documentation at: **http://localhost:8080/swagger-ui.html**
 
-**Example**:
-```bash
-GET /api/events/paginated?ciudad=Bogotá&categoria=Concierto&page=0&size=10&sort=price&direction=asc
+Documentation features:
+- ✅ Request/response examples
+- ✅ Detailed schemas
+- ✅ HTTP response codes
+- ✅ Documented validations
+- ✅ Live testing ("Try it out")
+
+---
+
+## 🎯 Design Principles
+
+### Hexagonal Architecture ✅
+
+1. **Domain at the center**: Business logic doesn't depend on frameworks
+2. **Ports**: Interfaces that define contracts
+3. **Adapters**: Interchangeable implementations
+4. **Dependency inversion**: Infrastructure depends on domain
+
+### SOLID Principles ✅
+
+#### 1. Single Responsibility Principle (SRP)
+Each class has a single responsibility:
+- `CrearEventoUseCase`: Only create events
+- `EventoRepositoryAdapter`: Only adapt persistence
+- `EventController`: Only handle HTTP
+
+#### 2. Open/Closed Principle (OCP)
+Open for extension, closed for modification:
+```java
+// We can add new adapters without modifying use cases
+public class EventoMongoAdapter implements EventoRepositoryPort { }
+public class EventoRedisAdapter implements EventoRepositoryPort { }
 ```
 
-## ✅ Validation
+#### 3. Liskov Substitution Principle (LSP)
+Adapters are interchangeable:
+```java
+EventoRepositoryPort repo = new EventoRepositoryAdapter();  // JPA
+EventoRepositoryPort repo = new EventoMongoAdapter();       // MongoDB
+// The use case works with either
+```
 
-### Event Validation Rules
+#### 4. Interface Segregation Principle (ISP)
+Specific and cohesive interfaces:
+```java
+public interface EventoRepositoryPort { /* only event methods */ }
+public interface VenueRepositoryPort { /* only venue methods */ }
+```
 
-| Field | Validations | Error Message |
-|-------|-------------|---------------|
-| name | @NotBlank, @Size(3-200) | "Event name is required" / "Name must be between 3 and 200 characters" |
-| description | @Size(max=1000) | "Description cannot exceed 1000 characters" |
-| eventDate | @NotNull, @Future | "Event date is required" / "Event date must be in the future" |
-| categoria | @NotBlank, @Size(3-100) | "Category is required" |
-| venueId | @NotNull, @Positive | "Venue ID is required" |
-| capacity | @NotNull, @Positive, @Max(1000000) | "Capacity must be greater than 0" |
-| price | @NotNull, @Positive, @DecimalMax | "Price must be greater than 0" |
-
-### Venue Validation Rules
-
-| Field | Validations | Error Message |
-|-------|-------------|---------------|
-| name | @NotBlank, @Size(3-200) | "Venue name is required" |
-| address | @NotBlank, @Size(5-300) | "Address is required" |
-| city | @NotBlank, @Size(2-100) | "City is required" |
-| country | @NotBlank, @Size(2-100) | "Country is required" |
-| capacity | @NotNull, @Positive, @Max(1000000) | "Capacity must be greater than 0" |
-
-### Business Rules
-
-- ✅ Event names must be unique
-- ✅ Venue must exist before creating an event
-- ✅ Event date must be in the future
-
-## ⚠️ Error Handling
-
-The API uses a global exception handler (`@RestControllerAdvice`) that returns consistent error responses.
-
-### Error Response Format
-
-```json
-{
-  "timestamp": "2025-11-24T18:00:00",
-  "status": 400,
-  "error": "Bad Request",
-  "message": "Validation error in submitted data",
-  "path": "/api/events",
-  "details": [
-    "name: Name must be between 3 and 200 characters",
-    "eventDate: Event date must be in the future"
-  ]
+#### 5. Dependency Inversion Principle (DIP)
+Dependencies on abstractions:
+```java
+public class CrearEventoUseCase {
+    private final EventoRepositoryPort repository;  // ✅ Interface
+    // NOT: private final EventoRepositoryAdapter repository;  // ❌ Implementation
 }
 ```
 
-### HTTP Status Codes
+---
 
-| Code | Description | When |
-|------|-------------|------|
-| 200 | OK | Successful GET, PUT |
-| 201 | Created | Successful POST |
-| 204 | No Content | Successful DELETE |
-| 400 | Bad Request | Validation errors, invalid data |
-| 404 | Not Found | Resource not found |
-| 409 | Conflict | Unique constraint violation, FK violation |
-| 500 | Internal Server Error | Unexpected errors |
+## 💡 Usage Examples
 
-## 📝 Examples
+### 1. Create a Venue
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-## Notas y mejoras futuras
-- Persistencia real con JPA/Hibernate y base de datos.
-- Paginación, ordenamiento y filtros.
-- Tests unitarios e integración.
-- Seguridad (Spring Security, JWT).
-- Validaciones adicionales (rango de fechas, precio positivo con BigDecimal).
-=======
-=======
->>>>>>> 3a50946 (Update README.md)
-### Create a Venue
-
+**Request:**
 ```bash
-curl -X POST http://localhost:8080/api/venues \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "National Theater",
-    "address": "71st Street #10-25",
-    "city": "Bogotá",
-    "country": "Colombia",
-    "capacity": 1500
-  }'
+POST http://localhost:8080/api/venues
+Content-Type: application/json
+
+{
+  "name": "National Theater",
+  "address": "71st Street #10-25",
+  "city": "Bogotá",
+  "country": "Colombia",
+  "capacity": 1500
+}
 ```
 
-**Response (201 Created)**:
+**Response (201 Created):**
 ```json
 {
   "id": 1,
@@ -315,164 +366,201 @@ curl -X POST http://localhost:8080/api/venues \
 }
 ```
 
-### Create an Event
+### 2. Create an Event
 
+**Request:**
 ```bash
-curl -X POST http://localhost:8080/api/events \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Rock Concert 2025",
-    "description": "Amazing rock show",
-    "eventDate": "2025-12-15T20:00:00",
-    "venueId": 1,
-    "capacity": 1000,
-    "price": 80000,
-    "categoria": "Concert"
-  }'
+POST http://localhost:8080/api/events
+Content-Type: application/json
+
+{
+  "name": "Rock Concert",
+  "description": "Great rock concert",
+  "eventDate": "2025-12-15T20:00:00",
+  "categoria": "Music",
+  "venueId": 1,
+  "capacity": 1000,
+  "price": 80000.0
+}
 ```
 
-**Response (201 Created)**:
+**Response (201 Created):**
 ```json
 {
   "id": 1,
-  "name": "Rock Concert 2025",
-  "description": "Amazing rock show",
+  "name": "Rock Concert",
+  "description": "Great rock concert",
   "eventDate": "2025-12-15T20:00:00",
+  "categoria": "Music",
   "venueId": 1,
   "capacity": 1000,
-  "price": 80000.0,
-  "categoria": "Concert"
+  "price": 80000.0
 }
 ```
 
-### Get Paginated Events with Filters
+### 3. List Events by Venue
 
+**Request:**
 ```bash
-curl "http://localhost:8080/api/events/paginated?ciudad=Bogotá&categoria=Concert&page=0&size=10&sort=eventDate&direction=desc"
+GET http://localhost:8080/api/events/venue/1
 ```
 
-**Response (200 OK)**:
+**Response (200 OK):**
+```json
+[
+  {
+    "id": 1,
+    "name": "Rock Concert",
+    "eventDate": "2025-12-15T20:00:00",
+    "venueId": 1,
+    ...
+  }
+]
+```
+
+### 4. Error Handling
+
+**Error 404 - Resource not found:**
 ```json
 {
-  "content": [
-    {
-      "id": 1,
-      "name": "Rock Concert 2025",
-      "description": "Amazing rock show",
-      "eventDate": "2025-12-15T20:00:00",
-      "venueId": 1,
-      "capacity": 1000,
-      "price": 80000.0,
-      "categoria": "Concert"
-    }
-  ],
-  "pageable": {
-    "pageNumber": 0,
-    "pageSize": 10
-  },
-  "totalElements": 1,
-  "totalPages": 1,
-  "first": true,
-  "last": true
+  "timestamp": "2025-11-25T10:00:00",
+  "status": 404,
+  "error": "Not Found",
+  "message": "Event with ID 999 not found",
+  "path": "/api/events/999"
 }
 ```
 
-### Update an Event
-
-```bash
-curl -X PUT http://localhost:8080/api/events/1 \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Rock Concert 2025 - Updated",
-    "description": "Updated description",
-    "eventDate": "2025-12-15T21:00:00",
-    "venueId": 1,
-    "capacity": 1200,
-    "price": 90000,
-    "categoria": "Concert"
-  }'
-```
-
-### Delete an Event
-
-```bash
-curl -X DELETE http://localhost:8080/api/events/1
-```
-
-**Response**: 204 No Content
-
-### Error Example - Validation
-
-```bash
-curl -X POST http://localhost:8080/api/events \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "AB",
-    "eventDate": "2020-01-01T20:00:00",
-    "venueId": 1,
-    "capacity": -10,
-    "price": 0
-  }'
-```
-
-**Response (400 Bad Request)**:
+**Error 400 - Validation:**
 ```json
 {
-  "timestamp": "2025-11-24T18:00:00",
+  "timestamp": "2025-11-25T10:00:00",
   "status": 400,
   "error": "Bad Request",
-  "message": "Validation error in submitted data",
+  "message": "Validation failed",
   "path": "/api/events",
-  "details": [
-    "name: Name must be between 3 and 200 characters",
-    "eventDate: Event date must be in the future",
-    "capacity: Capacity must be greater than 0",
-    "price: Price must be greater than 0",
-    "categoria: Category is required"
-  ]
+  "details": {
+    "name": "Event name is required",
+    "eventDate": "Event date is required"
+  }
 }
 ```
 
-### Error Example - Duplicate Name
-
-```bash
-# Trying to create an event with an existing name
-curl -X POST http://localhost:8080/api/events \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Rock Concert 2025",
-    "eventDate": "2025-12-20T20:00:00",
-    "venueId": 1,
-    "capacity": 800,
-    "price": 75000,
-    "categoria": "Concert"
-  }'
-```
-
-**Response (400 Bad Request)**:
+**Error 500 - Internal error (generic message for security):**
 ```json
 {
-  "timestamp": "2025-11-24T18:00:00",
-  "status": 400,
-  "error": "Bad Request",
-  "message": "An event with the name 'Rock Concert 2025' already exists",
+  "timestamp": "2025-11-25T10:00:00",
+  "status": 500,
+  "error": "Internal Server Error",
+  "message": "An internal error has occurred. Please contact the administrator.",
   "path": "/api/events"
 }
 ```
 
-## 🧪 Testing with Swagger UI
+---
 
-1. Navigate to http://localhost:8080/swagger-ui.html
-2. Expand an endpoint (e.g., POST /api/venues)
+## 🔒 Security
+
+- ✅ **Generic error messages**: SQL details and stack traces are not exposed
+- ✅ **Validations**: Bean Validation on all DTOs
+- ✅ **Centralized exception handling**: `GlobalExceptionHandler`
+
+---
+
+## 📝 Configuration
+
+### H2 Database
+
+The application uses H2 in-memory. Configuration in `application.properties`:
+
+```properties
+spring.datasource.url=jdbc:h2:mem:tiqueteradb
+spring.datasource.driverClassName=org.h2.Driver
+spring.h2.console.enabled=true
+spring.h2.console.path=/h2-console
+```
+
+**Access H2 Console:**
+- URL: http://localhost:8080/h2-console
+- JDBC URL: `jdbc:h2:mem:tiqueteradb`
+- User: `sa`
+- Password: (empty)
+
+---
+
+## 🧪 Testing
+
+### Test with cURL
+
+```bash
+# Create venue
+curl -X POST http://localhost:8080/api/venues \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Theater","address":"1st Street","city":"Bogotá","country":"Colombia","capacity":500}'
+
+# Create event
+curl -X POST http://localhost:8080/api/events \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Concert","description":"Show","eventDate":"2025-12-15T20:00:00","categoria":"Music","venueId":1,"capacity":500,"price":50000}'
+
+# List events
+curl http://localhost:8080/api/events
+```
+
+### Test with Swagger UI
+
+1. Go to http://localhost:8080/swagger-ui.html
+2. Select an endpoint
 3. Click "Try it out"
-4. Fill in the JSON example
+4. Fill in the example JSON
 5. Click "Execute"
-6. View the response with HTTP status code
 
-Swagger validates data before sending and displays clear errors.
+---
+
+## 📊 Benefits of this Architecture
+
+### Maintainability
+- Organized and easy-to-understand code
+- Clear responsibilities
+- Localized changes
+
+### Testability
+- Easy to create unit tests with mocks
+- Independent use cases
+- Ports allow injecting fake implementations
+
+### Flexibility
+- Easy to switch from JPA to MongoDB
+- Easy to add new adapters
+- Protected business logic
+
+### Scalability
+- Decoupled components
+- Easy to add new features
+- Architecture ready for microservices
+
+---
+
+## 👥 Author
+
+**Tiquetera Team**
+- Email: soporte@tiquetera.com
+
+---
 
 ## 📄 License
 
-This project is licensed under the Apache License 2.0.
+This project is licensed under Apache 2.0 - see the [LICENSE](LICENSE) file for details.
 
+---
 
+## 🔗 Useful Links
+
+- [Spring Boot Documentation](https://spring.io/projects/spring-boot)
+- [Hexagonal Architecture](https://en.wikipedia.org/wiki/Hexagonal_architecture_(software))
+- [SOLID Principles](https://en.wikipedia.org/wiki/SOLID)
+- [OpenAPI Specification](https://swagger.io/specification/)
+
+---
+
+**Questions or suggestions?** Open an issue on GitHub or contact the development team.
